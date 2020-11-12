@@ -38,13 +38,14 @@ class Graph:
         q = Queue()
         visited = set()
         q.enqueue(starting_vertex)
+        visited.add(starting_vertex)
         while q.size() > 0:
             name = q.dequeue()
             print(name)
-            visited.add(name)
             for neighbor in self.get_neighbors(name):
                 if neighbor not in visited:
                     q.enqueue(neighbor)
+                    visited.add(neighbor)
 
     def dft(self, starting_vertex):
         """
@@ -95,15 +96,29 @@ class Graph:
         breath-first order.
         """
         q = Queue()
-        visited = set()
-        path = Stack()
+        # map of node names to their parent
+        # also used to keep track of visited nodes
+        visited = {}
+
         q.enqueue(starting_vertex)
+        visited[starting_vertex] = None
         while q.size() > 0:
             name = q.dequeue()
-            visited.add(name)
+
+            # check for match
+            if name == destination_vertex:
+                path = []
+                cur = name
+                while cur:
+                    path.append(cur)
+                    cur = visited[cur]
+
+                return list(reversed(path))
+
             for neighbor in self.get_neighbors(name):
                 if neighbor not in visited:
                     q.enqueue(neighbor)
+                    visited[neighbor] = name
 
         return None
 
@@ -113,7 +128,27 @@ class Graph:
         starting_vertex to destination_vertex in
         depth-first order.
         """
-        pass  # TODO
+        s = Stack()
+        visited = {}
+
+        s.push(starting_vertex)
+        visited[starting_vertex] = None
+        while s.size() > 0:
+            name = s.pop()
+            
+            if name == destination_vertex:
+                path = []
+                cur = name
+                while cur:
+                    path.append(cur)
+                    cur = visited[cur]
+
+                return list(reversed(path))
+
+            for neighbor in self.get_neighbors(name):
+                if neighbor not in visited:
+                    s.push(neighbor)
+                    visited[neighbor] = name
 
     def dfs_recursive(self, starting_vertex, destination_vertex):
         """
