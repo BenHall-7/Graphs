@@ -87,8 +87,6 @@ class Graph:
                 if neighbor not in self.visited_cache:
                     self.dft_recursive(neighbor)
 
-
-
     def bfs(self, starting_vertex, destination_vertex):
         """
         Return a list containing the shortest path from
@@ -158,7 +156,20 @@ class Graph:
 
         This should be done using recursion.
         """
-        pass  # TODO
+        if starting_vertex == destination_vertex:
+            return [starting_vertex]
+        
+        for neighbor in self.get_neighbors(starting_vertex):
+            if neighbor not in self.visited_cache:
+                self.visited_cache.add(neighbor)
+                found = self.dfs_recursive(neighbor, destination_vertex)
+                if found:
+                    self.visited_cache.clear()
+                    found.insert(0, starting_vertex)
+                    return found
+
+        self.visited_cache.clear()
+        return None
 
 if __name__ == '__main__':
     graph = Graph()  # Instantiate your graph
