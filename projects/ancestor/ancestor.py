@@ -1,4 +1,4 @@
-from collections import deque;
+from collections import deque
 
 def earliest_ancestor(ancestors, starting_node):
     ancestry = {}
