@@ -1,6 +1,14 @@
+import random
+from collections import deque
+
 class User:
     def __init__(self, name):
         self.name = name
+
+def fisher_yates_shuffle(l):
+    for i in range(0, len(l)):
+        random_index = random.randint(i, len(l) - 1)
+        l[random_index], l[i] = l[i], l[random_index]
 
 class SocialGraph:
     def __init__(self):
@@ -42,11 +50,23 @@ class SocialGraph:
         self.last_id = 0
         self.users = {}
         self.friendships = {}
-        # !!!! IMPLEMENT ME
 
         # Add users
+        for name in range(num_users):
+            self.add_user(name)
 
         # Create friendships
+        # Duplications are prevented by only choosing friends with lower IDs
+        friendships = []
+        for user_id in range(1, num_users + 1):
+            for friend_id in range(1, user_id):
+                friendships.append((user_id, friend_id))
+        # Sort friendship possibilities randomly
+        # Then choose the number necessary to make the average
+        fisher_yates_shuffle(friendships)
+        actual = friendships[:num_users * avg_friendships // 2]
+        for a, b in actual:
+            self.add_friendship(a, b)
 
     def get_all_social_paths(self, user_id):
         """
@@ -58,9 +78,20 @@ class SocialGraph:
         The key is the friend's ID and the value is the path.
         """
         visited = {}  # Note that this is a dictionary, not a set
-        # !!!! IMPLEMENT ME
-        return visited
 
+        # Stores the next neighbors to add, and also the node one level closer
+        # in order to concatenate a path 
+        q = deque()
+        q.append((user_id, None))
+        while len(q) > 0:
+            user, prev = q.popleft()
+            # write the path for the current user
+            visited[user] = visited[prev] + [user] if prev is not None else [user]
+            for neighbor in self.friendships[user]:
+                if neighbor not in visited:
+                    q.append((neighbor, user))
+
+        return visited
 
 if __name__ == '__main__':
     sg = SocialGraph()
