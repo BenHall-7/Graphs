@@ -56,7 +56,19 @@ class SocialGraph:
         for name in range(num_users):
             self.add_user(name)
 
-        # Create friendships
+        # Create friendships (refer to diagram for this algorithm)
+
+        # All possible friendship ID's in a group of 5:
+        #     5  4  3  2
+        #   +-----------
+        # 1 | 1  2  4  7
+        # 2 | 3  5  8 
+        # 3 | 6  9
+        # 4 | 10
+        #
+        # use a random selection from 1 - 10
+        # use math to figure out the corresponding coordinates
+
         # Duplications are prevented by only choosing friends with lower IDs
         num_friendships = num_users * avg_friendships // 2
         # there are a 'triangle' number of possible friendships, we can ID them all
