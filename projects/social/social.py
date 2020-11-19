@@ -1,5 +1,6 @@
 import random
 from collections import deque
+from math import sqrt, ceil
 
 class User:
     def __init__(self, name):
@@ -57,16 +58,20 @@ class SocialGraph:
 
         # Create friendships
         # Duplications are prevented by only choosing friends with lower IDs
-        friendships = []
-        for user_id in range(1, num_users + 1):
-            for friend_id in range(1, user_id):
-                friendships.append((user_id, friend_id))
-        # Sort friendship possibilities randomly
-        # Then choose the number necessary to make the average
-        fisher_yates_shuffle(friendships)
-        actual = friendships[:num_users * avg_friendships // 2]
-        for a, b in actual:
-            self.add_friendship(a, b)
+        num_friendships = num_users * avg_friendships // 2
+        # there are a 'triangle' number of possible friendships, we can ID them all
+        num_possible = (num_users - 1) * num_users // 2
+        # pick a random sample
+        for friendship_id in random.sample(range(1, num_possible + 1), num_friendships):
+            reverse_triangle = (sqrt(8 * friendship_id + 1) - 1) / 2
+            rounded = ceil(reverse_triangle)
+            # get the first triangle number greater or equal to friendship_id
+            next_highest_triangle = (rounded + 1) * rounded // 2
+            # the difference tells us what two friends the id corresponds to
+            difference = next_highest_triangle - friendship_id
+            first_friend = rounded - difference
+            second_friend = num_users - difference
+            self.add_friendship(first_friend, second_friend)
 
     def get_all_social_paths(self, user_id):
         """
@@ -94,8 +99,35 @@ class SocialGraph:
         return visited
 
 if __name__ == '__main__':
-    sg = SocialGraph()
-    sg.populate_graph(10, 2)
-    print(sg.friendships)
-    connections = sg.get_all_social_paths(1)
-    print(connections)
+    # sg = SocialGraph()
+    # sg.populate_graph(10, 2)
+    # print(sg.friendships)
+    # connections = sg.get_all_social_paths(1)
+    # print(connections)
+
+    # question 1 and 2:
+    q1_results = []
+    q2_results = []
+    for _ in range(1000):
+        sg = SocialGraph()
+        sg.populate_graph(1000, 5)
+        network = sg.get_all_social_paths(1)
+        network_count = len(network) - 1 # exclude self
+        if network_count == 0:
+            # slim chance this can happen
+            continue
+        
+        degree_of_separation = 0
+        for person in network.items():
+            if person[0] != 1: # exclude self
+                degree_of_separation += len(person[1]) - 1
+        degree_of_separation /= network_count
+        
+        q1_results.append(network_count / 999)
+        q2_results.append(degree_of_separation)
+
+    print("Q1: percent of users in extended network")
+    print(sum(q1_results) / len(q1_results))
+    print("Q2: average degree of separation")
+    print(sum(q2_results) / len(q2_results))
+
