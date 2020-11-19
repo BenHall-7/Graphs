@@ -48,13 +48,18 @@ Note that in this sample, Users 3, 4 and 9 are not in User 1's extended social n
 
 1. To create 100 users with an average of 10 friends each, how many times would you need to call `add_friendship()`? Why?
 
+  500, because each new connection is 2 more friendships, one for each person associated. 100 * 10 / 2 = 500
+
 2. If you create 1000 users with an average of 5 random friends each, what percentage of other users will be in a particular user's extended social network? What is the average degree of separation between a user and those in his/her extended network?
 
-
+  Around 99% of users are in the extended network. Average degree of separation tends to be around 5.7
 
 ## 4. Stretch Goal
 
 1. You might have found the results from question #2 above to be surprising. Would you expect results like this in real life? If not, what are some ways you could improve your friendship distribution model for more realistic results?
 
+  On the contrary I find this to be expected since networks can easily explode in complexity. Perhaps real life is not quite as severe because it becomes more localized and less random, but in the age of internet communication this affect is similar to our model.
+
 2. If you followed the hints for part 1, your `populate_graph()` will run in O(n^2) time. Refactor your code to run in O(n) time. Are there any tradeoffs that come with this implementation?
 
+  In my case, there are no tradeoffs except those that come with Python's random.sample function. A hypothetical trade-off would be that a high sample count be a little slow to collect from the range of possible number
