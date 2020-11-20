@@ -13,9 +13,9 @@ world = World()
 # You may uncomment the smaller graphs for development and testing purposes.
 # map_file = "projects/adventure/maps/test_line.txt"
 # map_file = "projects/adventure/maps/test_cross.txt"
-map_file = "projects/adventure/maps/test_loop.txt"
+# map_file = "maps/test_loop.txt"
 # map_file = "maps/test_loop_fork.txt"
-# map_file = "maps/main_maze.txt"
+map_file = "maps/main_maze.txt"
 
 # Loads the map into a dictionary
 room_graph=literal_eval(open(map_file, "r").read())
@@ -70,7 +70,6 @@ while len(unfinished) > 0:
         # skip the whole backtracking completely
 
         room = player.current_room
-        visited.add(room.id)
 
         # we don't have to travel backwards, remove that direction from whatever this room is
         if room.id not in visited:
@@ -83,6 +82,8 @@ while len(unfinished) > 0:
             next_exits.remove(opposite_direction(choice))
             if len(next_exits) == 0:
                 unfinished.pop(room.id)
+        
+        visited.add(room.id)
 
         # I don't need to do anything otherwise, it will fall through to the next else statement
     else:
