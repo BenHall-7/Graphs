@@ -11,10 +11,10 @@ world = World()
 
 
 # You may uncomment the smaller graphs for development and testing purposes.
-# map_file = "projects/adventure/maps/test_line.txt"
-# map_file = "projects/adventure/maps/test_cross.txt"
-# map_file = "projects/adventure/maps/test_loop.txt"
-# map_file = "projects/adventure/maps/test_loop_fork.txt"
+# map_file = "maps/test_line.txt"
+# map_file = "maps/test_cross.txt"
+# map_file = "maps/test_loop.txt"
+# map_file = "maps/test_loop_fork.txt"
 map_file = "maps/main_maze.txt"
 
 # Loads the map into a dictionary
@@ -113,17 +113,31 @@ current_path = deque()
 unfinished[player.current_room.id] = player.current_room.get_exits()
 visited.add(player.current_room.id)
 
+# used to tell if we've been in a loop in prior turns
+loops_entered = set()
+
 while len(unfinished) > 0:
     # see if there are unfinished exits at any point
     if player.current_room.id in unfinished:
+        # STRATEGY: we want to take any loop we run into, but deviate as much as possible after that
+        
         exits = unfinished[player.current_room.id]
-        not_in_loop = [e for e in exits if player.current_room.get_room_in_direction(e).id not in corr]
-        if len(not_in_loop) > 0:
-            choice = random.choice(not_in_loop)
+        # check and see if we're in a loop, first off
+        if player.current_room.id in corr:
+            loop_id, loop_position = corr[player.current_room.id]
+            loop_forward = loops[loop_id][loop_position]
+            loop_backward = opposite_direction(loops[loop_id][loop_position - 1])
+            if loop_id not in loops_entered:
+                choice = loop_forward
+                loops_entered.add(loop_id)
+            else:
+                excluded = [e for e in exits if e not in [loop_forward, loop_backward]]
+                choice = random.choice(excluded if len(excluded) else exits)
         else:
             choice = random.choice(exits)
-        exits.remove(choice)
+            in_loop_prior = False
         
+        exits.remove(choice)
         # if this is our last exit in the room to take, remove it from the 'unfinished' set
         if len(exits) == 0:
             unfinished.pop(player.current_room.id)
@@ -133,10 +147,6 @@ while len(unfinished) > 0:
         traversal_path.append(choice)
         current_path.append(choice)
 
-        # TODO: optimization strategy:
-        # if we entered a loop and don't need to go backwards for any missed rooms:
-        # skip the whole backtracking completely
-
         room = player.current_room
 
         # we don't have to travel backwards, remove that direction from whatever this room is
@@ -145,11 +155,9 @@ while len(unfinished) > 0:
             next_exits.remove(opposite_direction(choice))
             if len(next_exits) > 0:
                 unfinished[room.id] = next_exits
-        else:
-            print(room.id)
-            if room.id in unfinished:
-                next_exits = unfinished[room.id]
-                next_exits.remove(opposite_direction(choice))
+        elif room.id in unfinished:
+            next_exits = unfinished[room.id]
+            next_exits.remove(opposite_direction(choice))
             if len(next_exits) == 0:
                 unfinished.pop(room.id)
         
