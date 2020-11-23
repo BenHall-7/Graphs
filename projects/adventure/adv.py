@@ -13,9 +13,9 @@ world = World()
 # You may uncomment the smaller graphs for development and testing purposes.
 # map_file = "projects/adventure/maps/test_line.txt"
 # map_file = "projects/adventure/maps/test_cross.txt"
-# map_file = "maps/test_loop.txt"
-map_file = "projects/adventure/maps/test_loop_fork.txt"
-# map_file = "maps/main_maze.txt"
+# map_file = "projects/adventure/maps/test_loop.txt"
+# map_file = "projects/adventure/maps/test_loop_fork.txt"
+map_file = "maps/main_maze.txt"
 
 # Loads the map into a dictionary
 room_graph=literal_eval(open(map_file, "r").read())
@@ -32,14 +32,6 @@ traversal_path = []
 
 # ================================================================ #
 
-# find any/all loops by doing a full depth-first traversal
-
-# each loop is a list of directions (forward, backward) to take to traverse the loop
-loops = []
-# stores which loop ID each room corresponds to (if any, only one for this problem)
-# and also what position that room is in inside the corresponding loop structure
-corr = {}
-
 def opposite_direction(direction):
     return {
         'n': 's',
@@ -48,8 +40,15 @@ def opposite_direction(direction):
         "w": "e"
     }[direction]
 
+# find any/all loops by doing a full depth-first traversal
+
 def get_loops(start_room):
-    global loops, corr
+    # each loop is a list of directions (forward, backward) to take to traverse the loop
+    loops = []
+    # stores which loop ID each room corresponds to (if any, only one for this problem)
+    # and also what position that room is in inside the corresponding loop structure
+    corr = {}
+
     unfinished = {}
     current_path = deque()
     visited = set()
@@ -85,7 +84,10 @@ def get_loops(start_room):
                 # 'next_room' would go backward to end up in 'current'
                 first_dir = opposite_direction(next_direction)
                 loop.append(first_dir)
-                unfinished[next_room.id].remove(first_dir)
+                first_dir_left = unfinished[next_room.id]
+                first_dir_left.remove(first_dir)
+                if len(first_dir_left) == 0:
+                    unfinished.pop(next_room.id)
                 corr[next_room.id] = (loop_id, 0)
                 for i, v in enumerate(reversed(current_path), 1):
                     back_room = v[0]
@@ -98,8 +100,9 @@ def get_loops(start_room):
                 loops.append(loop)
         else:
             current_path.pop()
+    return loops, corr
 
-get_loops(player.current_room)
+loops, corr = get_loops(player.current_room)
 
 # maps room id to a set of paths not taken yet
 unfinished = {}
@@ -114,7 +117,11 @@ while len(unfinished) > 0:
     # see if there are unfinished exits at any point
     if player.current_room.id in unfinished:
         exits = unfinished[player.current_room.id]
-        choice = random.choice(exits)
+        not_in_loop = [e for e in exits if player.current_room.get_room_in_direction(e).id not in corr]
+        if len(not_in_loop) > 0:
+            choice = random.choice(not_in_loop)
+        else:
+            choice = random.choice(exits)
         exits.remove(choice)
         
         # if this is our last exit in the room to take, remove it from the 'unfinished' set
