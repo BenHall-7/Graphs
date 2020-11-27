@@ -114,7 +114,9 @@ unfinished[player.current_room.id] = player.current_room.get_exits()
 visited.add(player.current_room.id)
 
 # used to tell if we've been in a loop in prior turns
-loops_entered = set()
+# we store the room it started on and how large the path was, for easy backtracking
+# when we get to that room again, we can avoid cut a chunk of our current_path off
+loops_entered = {}
 
 while len(unfinished) > 0:
     # see if there are unfinished exits at any point
@@ -129,10 +131,13 @@ while len(unfinished) > 0:
             loop_backward = opposite_direction(loops[loop_id][loop_position - 1])
             if loop_id not in loops_entered:
                 choice = loop_forward
-                loops_entered.add(loop_id)
+                loops_entered[loop_id] = (player.current_room.id, len(current_path))
             else:
+                entered_room, shortcut = loops_entered[loop_id]
                 excluded = [e for e in exits if e not in [loop_forward, loop_backward]]
                 choice = random.choice(excluded if len(excluded) else exits)
+                if player.current_room.id == entered_room:
+                    current_path = deque(list(current_path)[:shortcut])
         else:
             choice = random.choice(exits)
             in_loop_prior = False
