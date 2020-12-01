@@ -155,7 +155,6 @@ while len(unfinished) > 0:
                     current_path = deque(list(current_path)[:shortcut])
         else:
             choice = random.choice(exits)
-            in_loop_prior = False
         
         exits.remove(choice)
         # if this is our last exit in the room to take, remove it from the 'unfinished' set
