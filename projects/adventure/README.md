@@ -57,7 +57,11 @@ If all paths have been explored, you're done!
 
 It is very difficult to calculate the shortest possible path that traverses the entire graph. Why?
 
+  The existence of loops in a graph make the task significantly harder because one must now account for shortcuts in the path. A basic strategy of counting up all possible paths is exceptionally inefficient.
+
 My best path is 957 moves. Can you find a shorter path?
+
+  TODO
 
 
 ## Rubric

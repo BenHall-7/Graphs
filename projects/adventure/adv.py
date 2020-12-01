@@ -22,7 +22,7 @@ room_graph=literal_eval(open(map_file, "r").read())
 world.load_graph(room_graph)
 
 # Print an ASCII map
-world.print_rooms()
+# world.print_rooms()
 
 player = Player(world.starting_room)
 
@@ -39,6 +39,18 @@ def opposite_direction(direction):
         's': "n",
         "w": "e"
     }[direction]
+
+distance = {0: 0}
+q = deque()
+q.append(player.current_room)
+
+while len(q) > 0:
+    room = q.popleft()
+    for e in room.get_exits():
+        rm2 = room.get_room_in_direction(e)
+        if rm2.id not in distance:
+            distance[rm2.id] = distance[room.id] + 1
+            q.append(rm2)
 
 # find any/all loops by doing a full depth-first traversal
 
@@ -103,6 +115,9 @@ def get_loops(start_room):
     return loops, corr
 
 loops, corr = get_loops(player.current_room)
+
+world.print_rooms(corr, distance)
+print(f"rooms in loops: {sum(map(lambda l: len(l), loops))}")
 
 # maps room id to a set of paths not taken yet
 unfinished = {}

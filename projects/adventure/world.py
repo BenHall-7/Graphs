@@ -1,3 +1,4 @@
+from colorama import init, deinit, Back, Fore
 from room import Room
 import random
 import math
@@ -34,7 +35,9 @@ class World:
                 self.rooms[room_id].connect_rooms('w', self.rooms[room_graph[room_id][1]['w']])
         self.starting_room = self.rooms[0]
 
-    def print_rooms(self):
+    def print_rooms(self, loop_map, distance):
+        init()
+
         rotated_room_grid = []
         for i in range(0, len(self.room_grid)):
             rotated_room_grid.append([None] * len(self.room_grid))
@@ -52,38 +55,43 @@ class World:
             if all_null:
                 continue
             # PRINT NORTH CONNECTION ROW
-            str += "#"
+            print("#", end = '')
             for room in row:
                 if room is not None and room.n_to is not None:
-                    str += "  |  "
+                    print("  |  ", end = '')
                 else:
-                    str += "     "
-            str += "#\n"
+                    print("     ", end = '')
+            print("#")
             # PRINT ROOM ROW
-            str += "#"
+            print("#", end = '')
             for room in row:
                 if room is not None and room.w_to is not None:
-                    str += "-"
+                    print("-", end = '')
                 else:
-                    str += " "
+                    print(" ", end = '')
                 if room is not None:
-                    str += f"{room.id}".zfill(3)
+                    if room.id in loop_map:
+                        print(Back.RED + f"{distance[room.id]}".zfill(3) + Back.RESET, end = '')
+                    else:
+                        print(f"{distance[room.id]}".zfill(3), end = '')
                 else:
-                    str += "   "
+                    print("   ", end = '')
                 if room is not None and room.e_to is not None:
-                    str += "-"
+                    print("-", end = '')
                 else:
-                    str += " "
-            str += "#\n"
+                    print(" ", end = '')
+            print("#")
             # PRINT SOUTH CONNECTION ROW
-            str += "#"
+            print("#", end = '')
             for room in row:
                 if room is not None and room.s_to is not None:
-                    str += "  |  "
+                    print("  |  ", end = '')
                 else:
-                    str += "     "
-            str += "#\n"
+                    print("     ", end = '')
+            print("#")
         print(str)
+        # print(Fore.RED + "test")
         print("#####")
+        deinit()
 
 
